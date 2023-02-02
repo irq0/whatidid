@@ -1,0 +1,7 @@
+* Capture
+** Emacs
+#+begin_src elisp
+(setq-default frame-title-format "%b ⋄ %f")
+#+end_src
+
+* Analyze

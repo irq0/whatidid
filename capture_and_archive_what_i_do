@@ -1,0 +1,19 @@
+#!/bin/bash
+# cronjob wrapper script
+
+set -e
+
+XAUTHORITY="$(find "/run/user/$(id --user)/" -maxdepth 1 -iname 'xauth_*' | head -1)"
+DISPLAY="${DISPLAY:-:0}"
+PATH="$PATH:$HOME/bin"
+
+# not logged in?
+if [[ -z $XAUTHORITY ]]; then
+  exit 0
+fi
+
+export XAUTHORITY DISPLAY PATH
+
+what="$(capture_what_i_do.py)"
+logfile="$HOME/var/what_i_did/$(date +%Y-KW%V).log"
+echo "$what" >> "$logfile"
