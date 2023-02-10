@@ -1,0 +1,65 @@
+title: What did I do last?
+databases:
+  lastweek:
+    tables:
+      log:
+        facets:
+          - command
+          - thing
+          - category
+          - active_task
+          - desktop
+          - music_playing
+    queries:
+      top-music:
+        title: Top Music
+        sql: |-
+           select
+              count(ts) as times,
+              music_playback
+            from log
+            where music_playback != ''
+            group by music_playback
+            limit 5
+
+plugins:
+  datasette-dashboards:
+    my-dashboard:
+      title: Computer Usage
+      description: Showing some nice metrics
+      layout:
+        - [analysis-note, events-count]
+        - [analysis-note, events-source]
+      filters:
+        date_start:
+          name: Date Start
+          type: date
+        date_end:
+          name: Date End
+          type: date
+      charts:
+        analysis-note:
+          library: markdown
+          display: |-
+            # Analysis notes
+            > A quick rundown of events statistics and KPIs
+
+        events-count:
+          title: Minutes logged
+          db: lastweek
+          query: SELECT count(*) as count FROM log
+          library: metric
+          display:
+            field: count
+            prefix:
+            suffix:
+        events-source:
+          title: Number of events by source
+          db: lastweek
+          query: SELECT thing, count(*) as count FROM log WHERE TRUE [[ AND date >= date(:date_start) ]] [[ AND date <= date(:date_end) ]] GROUP BY thing ORDER BY count DESC
+          library: vega
+          display:
+            mark: { type: bar, tooltip: true }
+            encoding:
+              color: { field: source, type: nominal }
+              theta: { field: count, type: quantitative }
