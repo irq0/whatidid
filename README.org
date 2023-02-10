@@ -1,7 +1,38 @@
+#+TITLE: what_i_do and what_i_did
+
+Simple tools to capture and analyze what I did on the computer.
+
+There are many products that do this, but I could not find anything
+that worked well on Linux X11.
+
 * Capture
+The [[./capture_what_i_do.py]] script captures the current session and outputs it as a JSON object.
+[[./capture_and_archive_what_i_do]] is a cronjob wrapper that records the JSON object into files.
+One file per calendar week.
+
+I run the script every minute:
+#+begin_example
+*/1 * * * * chronic ~/bin/capture_and_archive_what_i_do
+#+end_example
+
+To better analyze some programs title strings, some changes make sense:
+
 ** Emacs
+This adds the full filename to the emacs window title:
 #+begin_src elisp
 (setq-default frame-title-format "%b ⋄ %f")
 #+end_src
 
 * Analyze
+To analyze a week or more load the JSON log files into a SQLite database with [[./whatidid_to_sqlite.py]].
+
+For example:
+#+begin_example
+./whatidid_to_sqlite.py convert lastweek.sqlite3 ~/var/what_i_did/2023-KW05.log
+#+end_example
+
+Then run the excellent [[https://datasette.io][datasette]] on it:
+
+#+begin_example
+datasette --metadata metadata.yml lastweek.sqlite3
+#+end_example
